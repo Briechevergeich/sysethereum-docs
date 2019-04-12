@@ -1,115 +1,93 @@
-# Dogecoin <-> Ethereum bridge docs
+# Syscoin <-> Ethereum bridge docs
 
-The Dogecoin <-> Ethereum bridge is a system that allows Doges to be moved from the Dogecoin blockchain to the Ethereum blockchain and back.
-Read the [intro for non-technical users](https://jrn.me.uk//dogecoin/doge-ethereum-bridge/) by [Ross Nicoll](https://github.com/rnicoll).
+The Syscoin <-> Ethereum bridge is a system that allows Syss to be moved from the Syscoin blockchain to the Ethereum blockchain and back.
+Read the [intro for non-technical users](https://jrn.me.uk//syscoin/sys-ethereum-bridge/) by [Ross Nicoll](https://github.com/rnicoll).
 
 ## Main subprojects
-* [Dogethereum contracts](https://github.com/dogethereum/dogethereum-contracts): Ethereum contracts.
-* [Dogethereum agents](https://github.com/dogethereum/dogethereum-agents): External agents.
-* [Dogethereum tools](https://github.com/dogethereum/dogethereum-tools): CLI tools for Users and operators.
-* [Scrypt hash verification](https://github.com/dogethereum/scrypt-interactive): Interactive (i.e. challenge/response) validation of Scrypt hashes.
-
-## Doge to Eth
+* [Systhereum contracts](https://github.com/syscoin/systhereum-contracts): Ethereum contracts.
+* [Systhereum agents](https://github.com/syscoin/systhereum-agents): External agents.
+* [Systhereum Dapp](https://github.com/syscoin/systhereum-dapp): UI Dapp for reference implementation.
+## Sys to Eth
 
 ![Design](./design.png)
 
 ## Superblocks
 
-The Doge -> Eth side uses a new concept we named Superblocks. Read the [white paper](superblocks/superblocks-white-paper.pdf).
+The Sys -> Eth side uses a new concept we named Superblocks. Read the [white paper](superblocks/superblocks-white-paper.pdf).
 
 
-## Eth to Doge
+## Eth to Sys
 
-![Design](./design-eth2doge.png)
+![Design](./design-eth2sys.png)
 
-## Collateralized bridge
+## Bridge
 
-We implemented a "collateralized" solution for the Eth -> Doge side. Here are the core concepts:
+We implemented a "non-collateralized" solution for the Eth -> Sys side. Here are the core concepts:
 
-* When a user wants to get doge tokens, she has to send the doges to a "Bridge operator". A bridge operator receives doges from users and holds them while they are locked. The smart contract mints doge tokens for the user.
-* When a user burns her doge tokens, a "bridge operator" is requested to send the doges back to the user.
-* Anyone can be a bridge operator.
-* "Bridge operators" deposit ether (collateral) on a smart contract. If they do anything with the doges but what is expected, they lose their eth deposit. 
-* Anyone can report to the smart contract a doge tx showing a "bridge operator" misbehaviour.
-* There is an oracle for eth/doge price.
-
+* When a user wants to get sysx tokens, she has to send the sys to a Superblock contract which relays to a Token contract. The smart contract mints sysx tokens for the user. Assets on Syscoin are also done in similar way.
+* When a user burns her sysx tokens, she has to wait for 240 confirmations and then create a mint transaction on Syscoin to request the sys back to the user.
 
 ## Actors
 
 This is the list of external actors to the system and what they can do.
 
 * User
-  * Lock (Doge -> Eth).
-  * Transfer doge tokens (Eth -> Eth).
-  * Unlock (Eth -> Doge).
-* Operator
-  * Register as operator.
-  * Add/Remove Eth collateral deposit.
-  * Store locked doges.
-  * Create, sign & broadcast doge unlock tx.
+  * Lock (Sys -> Eth).
+  * Transfer sys tokens (Eth -> Eth).
+  * Unlock (Eth -> Sys).
 * Superblock Submitter
   * Propose superblocks.
   * Defend superblocks.
 * Superblock Challenger
   * Challenge superblocks.
-* Doge/Eth Price Oracle
-  * Inform Doge/Eth price rate.
 
 
 ## Workflows
 * New Superblock
-  * There is a new block on the doge blockchain, then another one, then another one...
-  * Once per hour Superblock Submitters create a new Superblock containing the newly created blocks and send a Superblock summary to [DogeClaimManager contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeClaimManager.sol)
+  * There is a new block on the sys blockchain, then another one, then another one...
+  * Once per hour Superblock Submitters create a new Superblock containing the newly created blocks and send a Superblock summary to [SyscoinClaimManager contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinClaimManager.sol)
   * Superblock Challengers will challenge the superblock if they find it invalid. They will request the list of block hashes, the block headers, etc. Superblock Submitters should send that information which is validated onchain by the contract.
-  * A Superblock Challenger might challenge one of the block's scrypt hashes. In that case [DogeClaimManager contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeClaimManager.sol) uses Truebit's [Scrypt hash verification](https://github.com/dogethereum/scrypt-interactive) to check its correctness.
   * If any information provided by the Superblock Submitter is proven wrong or if it fails to answer, the Superblock is discarded.
-  * If no challenge to the Superblock was done after a contest period (or if the challenges failed) the superblock is considered to be "approved". [DogeClaimManager contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeClaimManager.sol) contract notifies [DogeSuperblocks contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeSuperblocks.sol) which adds the Superblock to its Superblock chain.
-  * Note: [DogeSuperblocks contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeSuperblocks.sol) uses a checkpoint instead of starting from dogecoin blockchain genesis.
- 
+  * If no challenge to the Superblock was done after a contest period (or if the challenges failed) the superblock is considered to be "approved". [SyscoinClaimManager contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinClaimManager.sol) contract notifies [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) which adds the Superblock to its Superblock chain.
+  * Note: [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) uses a checkpoint instead of starting from Syscoin blockchain genesis.
+  * Note: [Sysethereum-Dapp](https://github.com/syscoin/systhereum-dapp) was created with this workflow in mind in an automated native ReactJS application for convenience.
 
-* Sending dogecoins to ethereum
-  * User selects an operator (any operator who has the desired amount of eth collateral).
-  * User sends a lock doge tx of N doges to the doge network using [Dogethereum tools](https://github.com/dogethereum/dogethereum-tools) `lock` tool.
-  * The doge tx is included in a doge block and several doge blocks are mined on top of it.
-  * Once the doge block is included in an approved superblock, the lock tx is ready to be relayed to the eth network.
-  * A [doge altruistic doge lock tx submitter](https://github.com/dogethereum/dogethereum-agents)  finds the doge lock tx (In the future there will be a tool for users to relay their own txs).
-  * The [doge altruistic doge lock tx submitter](https://github.com/dogethereum/dogethereum-agents) sends an eth tx to [DogeSuperblocks contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeSuperblocks.sol) containing: the doge lock tx, a partial merkle tree proving the doge lock tx was included in a doge block, the doge block header that contains the doge lock tx, another partial merkle tree proving the block was included in a superblock and the superblock id that contains the block.
-  * [DogeSuperblocks contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/DogeSuperblocks.sol) checks the consistency of the supplied information and relays the doge lock tx to [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol).
-  * [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol) checks the doge lock tx actually sends funds to the doge address of a registered operator.
-  * [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol) mints N tokens and assigns them to the User. Dogecoin lock txs don't specify a destination eth address. Dogetokens will be assigned to the eth address controlled by the private key that signed the dogecoin lock tx.
+* Sending syscoins to ethereum
+  * User creates burn sys tx on the sys network using by calling `syscoinburn` or `assetallocationburn`.
+  * The sys tx is included in a sys block and several sys blocks are mined on top of it.
+  * Once the sys block is included in an approved superblock, the burn tx is ready to be relayed to the eth network.
+  * The use sends an eth tx to [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) containing: the sys burn tx, a partial merkle tree proving the sys burn tx was included in a sys block, the sys block header that contains the sys burn tx, another partial merkle tree proving the block was included in a superblock and the superblock id that contains the block.
+  * [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) checks the consistency of the supplied information and relays the sys burn tx to [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol).
+  * [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol) mints N sysx tokens and assigns them to the User. Syscoin burn txs specify a destination eth address.
 
 
-* Sending doge tokens back to dogecoin
-  * User selects an operator (any operator who has the desired amount of locked doges).
-  * User sends an eth tx to the [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol) invoking the `doUnlock` function. Destination doge address, amount and operator id are supplied as parameters.
-  * [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol) selects the UTXOs to spend, defines the doge tx fee, change and operator fee.
-  * The [operator agent](https://github.com/dogethereum/dogethereum-agents) notices the unlock request. It creates, signs & broadcasts a doge unlock tx. 
-  * The user receives the unlocked doges.
-  * The operator waits the doge tx to be confirmed and included in a superblock and then relays the doge unlock tx to the eth network, so change can be used by [DogeToken contract](https://github.com/dogethereum/dogethereum-contracts/blob/master/contracts/token/DogeToken.sol) for future unlocks.
+* Sending sysx tokens back to syscoin
+  * User sends an eth tx to the [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol) invoking the `burn` function. Destination sys address, amount and asset id are supplied as parameters.
+  * The [User](https://github.com/syscoin/systhereum-agents) after waiting 240 confirmations on Ethereum creates, signs & broadcasts a sys mint tx using `syscoinmint` or  `assetallocationmint` depending if moving Syscoin or an asset on syscoin. 
+  * The user receives the unlocked sys.
 
 ## Incentives
 
 Some operations require gas to be spent or eth deposit to be frozen. Here are the incentives for doing that.
 
-* Submitting a Superblock: Superblock submitters will get a fee when the superblock they sent is used to relay a tx.
-* Being an operator: Each time a lock/unlock tx is made, operator gets a fee.
-* Sending dogecoin txs to DogeToken: Each user will send their own dogecoin lock tx to get doge tokens.
+* Submitting a Superblock: Superblock submitters will get a fee when the superblock they sent is used to relay a tx. The Agent may connect to the local Geth node running alongside Syscoin. The account on the Geth node used by the Agent (configured in the conf file in the Agent settings) should be set to this account and unlocked on the Geth node.
 * Superblock challenge: Challengers who find invalid superblocks will get some eth after the challenge/response game finishes.
+* Each user will Syscoin txs to SyscoinSuperblock to go to Ethereum or calling the Burn function on the SyscoinToken to go back to Syscoin. The user is also responsible for paying the Syscoin network fees for creating burn and mint transactions on the Syscoin network.
 
 
 ## Assumptions
 * Incentives will guarantee that there is always at least one honest Superblock Submitter and one honest Superblock Challenger online.
-* There are no huge reorgs (i.e. 100+ block) in Doge nor in Eth blockchains
+* There are no huge reorgs (i.e. 100+ block) in Sys nor in Eth blockchains
 
 ## Team
 
-* [Ismael Bejarano](https://github.com/ismaelbej)
-* [Catalina Juarros](https://github.com/cat-j)
-* [Pablo Yabo](https://github.com/pipaman)
-* [Oscar Guindzberg](https://github.com/oscarguindzberg)
+* [Jagdeep Sidhu](https://github.com/sidhujag)
+* [Willy Ko](https://github.com/willyk)
+* [Dan Wasyluk](https://github.com/dwasyluk)
 
 ## License
 
 MIT License<br/>
+Copyright (c) 2019 Jagdeep Sidhu <br/>
 Copyright (c) 2018 Coinfabrik & Oscar Guindzberg<br/>
 [License](LICENSE)
