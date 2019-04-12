@@ -52,7 +52,7 @@ This is the list of external actors to the system and what they can do.
   * Note: [SyscoinSuperblocks contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) uses a checkpoint instead of starting from Syscoin blockchain genesis.
   * Note: [Sysethereum-Dapp](https://github.com/syscoin/sysethereum-dapp) was created with this workflow in mind in an automated native ReactJS application for convenience.
 
-* Sending syscoins to ethereum
+* Sending Syscoins to ethereum
   * User creates burn sys tx on the sys network using by calling `syscoinburn` or `assetallocationburn`.
   * The sys tx is included in a sys block and several sys blocks are mined on top of it.
   * Once the sys block is included in an approved superblock, the burn tx is ready to be relayed to the eth network.
@@ -63,7 +63,7 @@ This is the list of external actors to the system and what they can do.
 
 * Sending sysx tokens back to syscoin
   * User sends an eth tx to the [SyscoinToken contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/token/SyscoinToken.sol) invoking the `burn` function. Destination sys address, amount and asset id are supplied as parameters.
-  * The [User](https://github.com/syscoin/sysethereum-agents) after waiting 240 confirmations on Ethereum creates, signs & broadcasts a sys mint tx using `syscoinmint` or  `assetallocationmint` depending if moving Syscoin or an asset on syscoin. 
+  * The User after waiting 240 confirmations on Ethereum creates, signs & broadcasts a sys mint tx using `syscoinmint` or  `assetallocationmint` depending if moving Syscoin or an asset on syscoin. 
   * The user receives the unlocked sys.
 
 ## Incentives
@@ -82,7 +82,7 @@ Some operations require gas to be spent or eth deposit to be frozen. Here are th
 ## Team
 
 * [Jagdeep Sidhu](https://github.com/sidhujag)
-* [Willy Ko](https://github.com/willyk)
+* [Willy Ko](https://github.com/willyko)
 * [Dan Wasyluk](https://github.com/dwasyluk)
 
 ## License
