@@ -4,9 +4,9 @@ The Syscoin <-> Ethereum bridge is a system that allows Syss to be moved from th
 Read the [intro for non-technical users](https://jrn.me.uk//syscoin/sys-ethereum-bridge/) by [Ross Nicoll](https://github.com/rnicoll).
 
 ## Main subprojects
-* [Systhereum contracts](https://github.com/syscoin/systhereum-contracts): Ethereum contracts.
-* [Systhereum agents](https://github.com/syscoin/systhereum-agents): External agents.
-* [Systhereum Dapp](https://github.com/syscoin/systhereum-dapp): UI Dapp for reference implementation.
+* [Sysethereum contracts](https://github.com/syscoin/sysethereum-contracts): Ethereum contracts.
+* [Sysethereum agents](https://github.com/syscoin/sysethereum-agents): External agents.
+* [Sysethereum Dapp](https://github.com/syscoin/sysethereum-dapp): UI Dapp for reference implementation.
 ## Sys to Eth
 
 ![Design](./design.png)
@@ -45,25 +45,25 @@ This is the list of external actors to the system and what they can do.
 ## Workflows
 * New Superblock
   * There is a new block on the sys blockchain, then another one, then another one...
-  * Once per hour Superblock Submitters create a new Superblock containing the newly created blocks and send a Superblock summary to [SyscoinClaimManager contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinClaimManager.sol)
+  * Once per hour Superblock Submitters create a new Superblock containing the newly created blocks and send a Superblock summary to [SyscoinClaimManager contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinClaimManager.sol)
   * Superblock Challengers will challenge the superblock if they find it invalid. They will request the list of block hashes, the block headers, etc. Superblock Submitters should send that information which is validated onchain by the contract.
   * If any information provided by the Superblock Submitter is proven wrong or if it fails to answer, the Superblock is discarded.
-  * If no challenge to the Superblock was done after a contest period (or if the challenges failed) the superblock is considered to be "approved". [SyscoinClaimManager contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinClaimManager.sol) contract notifies [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) which adds the Superblock to its Superblock chain.
-  * Note: [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) uses a checkpoint instead of starting from Syscoin blockchain genesis.
-  * Note: [Sysethereum-Dapp](https://github.com/syscoin/systhereum-dapp) was created with this workflow in mind in an automated native ReactJS application for convenience.
+  * If no challenge to the Superblock was done after a contest period (or if the challenges failed) the superblock is considered to be "approved". [SyscoinClaimManager contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinClaimManager.sol) contract notifies [SyscoinSuperblocks contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) which adds the Superblock to its Superblock chain.
+  * Note: [SyscoinSuperblocks contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) uses a checkpoint instead of starting from Syscoin blockchain genesis.
+  * Note: [Sysethereum-Dapp](https://github.com/syscoin/sysethereum-dapp) was created with this workflow in mind in an automated native ReactJS application for convenience.
 
 * Sending syscoins to ethereum
   * User creates burn sys tx on the sys network using by calling `syscoinburn` or `assetallocationburn`.
   * The sys tx is included in a sys block and several sys blocks are mined on top of it.
   * Once the sys block is included in an approved superblock, the burn tx is ready to be relayed to the eth network.
-  * The use sends an eth tx to [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) containing: the sys burn tx, a partial merkle tree proving the sys burn tx was included in a sys block, the sys block header that contains the sys burn tx, another partial merkle tree proving the block was included in a superblock and the superblock id that contains the block.
-  * [SyscoinSuperblocks contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) checks the consistency of the supplied information and relays the sys burn tx to [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol).
-  * [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol) mints N sysx tokens and assigns them to the User. Syscoin burn txs specify a destination eth address.
+  * The use sends an eth tx to [SyscoinSuperblocks contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) containing: the sys burn tx, a partial merkle tree proving the sys burn tx was included in a sys block, the sys block header that contains the sys burn tx, another partial merkle tree proving the block was included in a superblock and the superblock id that contains the block.
+  * [SyscoinSuperblocks contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/SyscoinSuperblocks.sol) checks the consistency of the supplied information and relays the sys burn tx to [SyscoinToken contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/token/SyscoinToken.sol).
+  * [SyscoinToken contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/token/SyscoinToken.sol) mints N sysx tokens and assigns them to the User. Syscoin burn txs specify a destination eth address.
 
 
 * Sending sysx tokens back to syscoin
-  * User sends an eth tx to the [SyscoinToken contract](https://github.com/syscoin/systhereum-contracts/blob/master/contracts/token/SyscoinToken.sol) invoking the `burn` function. Destination sys address, amount and asset id are supplied as parameters.
-  * The [User](https://github.com/syscoin/systhereum-agents) after waiting 240 confirmations on Ethereum creates, signs & broadcasts a sys mint tx using `syscoinmint` or  `assetallocationmint` depending if moving Syscoin or an asset on syscoin. 
+  * User sends an eth tx to the [SyscoinToken contract](https://github.com/syscoin/sysethereum-contracts/blob/master/contracts/token/SyscoinToken.sol) invoking the `burn` function. Destination sys address, amount and asset id are supplied as parameters.
+  * The [User](https://github.com/syscoin/sysethereum-agents) after waiting 240 confirmations on Ethereum creates, signs & broadcasts a sys mint tx using `syscoinmint` or  `assetallocationmint` depending if moving Syscoin or an asset on syscoin. 
   * The user receives the unlocked sys.
 
 ## Incentives
