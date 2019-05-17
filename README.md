@@ -9,7 +9,7 @@ The Syscoin <=> Ethereum bridge is a system that allows Syss to be moved from th
 * [Sysethereum Dapp](https://github.com/syscoin/sysethereum-dapp): UI Dapp for reference implementation.
 ## Sys to Eth
 
-![Design](./design.png)
+![Design](./sys2eth.png)
 
 ## Superblocks
 
@@ -18,7 +18,7 @@ The Sys -> Eth side uses a new concept we named Superblocks. Read the [white pap
 
 ## Eth to Sys
 
-![Design](./design-eth2sys.png)
+![Design](./eth2sys.png)
 
 ## Bridge
 
