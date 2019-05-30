@@ -1,6 +1,6 @@
 # Syscoin <=> Ethereum bridge docs
 
-The Syscoin <=> Ethereum bridge is a system that allows Syss to be moved from the Syscoin blockchain to the Ethereum blockchain and back.
+The Syscoin <=> Ethereum bridge is a system that allows Sys and Sys assets to be moved from the Syscoin blockchain to the Ethereum blockchain and back.
 
 
 ## Main subprojects
